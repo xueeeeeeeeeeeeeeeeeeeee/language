@@ -1,0 +1,193 @@
+<template>
+  <div class="header">
+    <h1>HanziLookupJS demo</h1>
+    <a href="https://github.com/gugray/HanziLookupJS"
+      >github.com/gugray/HanziLookupJS</a
+    >
+  </div>
+  <div class="content">
+    <div class="colLeft">
+      <h1>Stroke input</h1>
+      <div class="drawingBoard loading"><span>Loading...</span></div>
+      <div class="commands">
+        <div class="cmd cmdUndo">Undo</div>
+        <div class="cmd cmdClear">Clear</div>
+        <br />
+      </div>
+    </div>
+    <div class="colRight">
+      <h1>Recognized characters</h1>
+      <h2>Original HanziLookup data</h2>
+      <div class="charPicker hanziLookupChars"></div>
+      <h2>Make Me a Hanzi data</h2>
+      <div class="charPicker mmahLookupChars"></div>
+    </div>
+  </div>
+</template>
+<script setup>
+import $ from "jquery";
+
+import Tesseract from "tesseract.js";
+import { HanziLookup } from "../js/hanzilookup.min.js";
+import { ref, onMounted, watch, getCurrentInstance } from "vue";
+var _filesToLoad;
+var _drawingBoard;
+const ocr = () => {};
+onMounted(() => {
+  _filesToLoad = 2;
+  HanziLookup.init("mmah", "/mmah.json", fileLoaded);
+  HanziLookup.init("orig", "/orig.json", fileLoaded);
+  // Initializes mini-app once all scripts have loaded
+});
+function fileLoaded(success) {
+  if (!success) {
+    _filesToLoad = -1;
+    $(".drawingBoard span").text("Failed to load data.");
+    return;
+  }
+  --_filesToLoad;
+  if (_filesToLoad != 0) return;
+  // All data scripts loaded
+  $(".drawingBoard").removeClass("loading");
+  // Create handwriting canvas (this is optional, you can bring your own)
+  _drawingBoard = HanziLookup.DrawingBoard($(".drawingBoard").first(), lookup);
+  // Undo/redo commands - have to do with input
+  $(".cmdUndo").click(function (evt) {
+    _drawingBoard.undoStroke();
+    _drawingBoard.redraw();
+    lookup();
+  });
+  $(".cmdClear").click(function (evt) {
+    _drawingBoard.clearCanvas();
+    _drawingBoard.redraw();
+    lookup();
+  });
+}
+
+// Fetches hand-drawn input from drawing board and looks up Hanzi
+function lookup() {
+  // Decompose character from drawing board
+  var analyzedChar = new HanziLookup.AnalyzedCharacter(
+    _drawingBoard.cloneStrokes()
+  );
+  // Look up with original HanziLookup data
+  var matcherOrig = new HanziLookup.Matcher("orig");
+  matcherOrig.match(analyzedChar, 8, function (matches) {
+    showResults($(".hanziLookupChars"), matches);
+  });
+  // Look up with MMAH data
+  var matcherMMAH = new HanziLookup.Matcher("mmah");
+  matcherMMAH.match(analyzedChar, 8, function (matches) {
+    showResults($(".mmahLookupChars"), matches);
+  });
+}
+
+// Populates UI with (ordered) Hanzi matches
+function showResults(elmHost, matches) {
+  elmHost.html("");
+  for (var i = 0; i != matches.length; ++i) {
+    elmHost.append("<span>" + matches[i].character + "</span>");
+  }
+}
+</script>
+<style>
+body {
+  background-color: #fafafa;
+  font-family: Verdana, sans-serif;
+  padding-top: 70px;
+}
+div,
+h1,
+h2 {
+  position: relative;
+  float: left;
+  box-sizing: border-box;
+  height: auto;
+  overflow: auto;
+  width: 100%;
+  margin: 0;
+}
+h1 {
+  margin-bottom: 8px;
+}
+h2 {
+  font-weight: normal;
+}
+.content,
+.header {
+  width: 810px;
+  margin: 0 auto;
+  float: none;
+  background-color: #6688aa;
+  padding: 20px;
+  color: #f0f0f0;
+  border-radius: 8px;
+}
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.header a {
+  color: #fce566;
+  text-decoration: none;
+}
+.colLeft {
+  width: 270px;
+}
+.colRight {
+  width: 500px;
+  padding-left: 30px;
+}
+.drawingBoard {
+  width: 250px;
+  height: 250px;
+  cursor: crosshair;
+  clear: both;
+  overflow: hidden;
+  background-color: #fafafa;
+}
+.drawingBoard span {
+  display: none;
+}
+.drawingBoard.loading {
+  background-color: #f0f0f0;
+}
+.drawingBoard.loading span {
+  display: inline;
+  color: #606060;
+}
+.commands {
+  width: 250px;
+  margin-top: 3px;
+}
+.cmd {
+  width: 122px;
+  background-color: #fce7c0;
+  text-align: center;
+  cursor: default;
+  padding: 3px;
+  color: #606060;
+}
+.cmd.cmdUndo {
+  float: right;
+}
+.cmd:hover {
+  background-color: #f1d7a6;
+}
+.charPicker {
+  border: 1px solid #a0a0a0;
+  padding: 3px;
+  height: 70px;
+  width: 400px;
+  font-size: 48px;
+  background-color: #fafafa;
+  overflow: hidden;
+  color: #606060;
+}
+.charPicker span {
+  cursor: default;
+}
+.hanziLookupChars {
+  margin-bottom: 20px;
+}
+</style>

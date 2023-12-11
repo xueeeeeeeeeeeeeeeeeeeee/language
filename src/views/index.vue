@@ -15,7 +15,10 @@
     <div class="rightbody">
       <div class="nav"></div>
       <div class="index-mainbody">
+        <a-button @click="imprtdata">导入数据</a-button>
+        <a-button @click="exportdata">导出数据</a-button>
         <a-table
+        id="tabledata"
           :row-selection="rowSelection"
           :columns="columns"
           :data-source="data"
@@ -26,7 +29,10 @@
   </div>
 </template>
 <script setup>
-import { reactive, ref, watch, computed, unref } from "vue";
+import * as XLSX from 'xlsx'
+import axios from'axios'
+import FileSaver from 'file-saver'
+import { reactive, ref, watch, computed, unref,onMounted } from "vue";
 import { Table } from "ant-design-vue";
 const selectedKeys = ref(["1"]);
 const openKeys = ref(["sub1"]);
@@ -53,7 +59,7 @@ const handleClick = (e) => {
 watch(openKeys, (val) => {
   console.log("openKeys", val);
 });
-const columns = [
+const columns = ref([
   {
     title: "Name",
     dataIndex: "name",
@@ -66,10 +72,10 @@ const columns = [
     title: "Address",
     dataIndex: "address",
   },
-];
-const data = [];
+]);
+const data = ref([]);
 for (let i = 0; i < 46; i++) {
-  data.push({
+  data.value.push({
     key: i,
     name: `Edward King ${i}`,
     age: 32,
@@ -161,6 +167,29 @@ const rowSelection = computed(() => {
     ],
   };
 });
+const exportdata=()=>{
+  const exportArr = data.value;
+    const Header = [];
+    const head=[];
+ for(var i=0;i<columns.value.length;i++){
+  head.push(columns.value[i].title);
+ }
+ Header.push(head);
+ console.log(Header);
+    // 官方文档中的描述：converts an array of arrays of JS data to a worksheet.
+    const headerWs = XLSX.utils.aoa_to_sheet(Header);
+    const ws = XLSX.utils.sheet_add_json(headerWs, exportArr, {skipHeader: true, origin: "A2"});
+ 
+    /* 新建空workbook，然后加入worksheet */
+    const wb = XLSX.utils.book_new();
+ 
+    // 可以自定义下载之后的sheetname
+    XLSX.utils.book_append_sheet(wb, ws, "sheetName");
+ 
+    /* 生成xlsx文件 */
+    XLSX.writeFile(wb, "下载.xlsx");
+}
+const imprtdata =()=>{}
 </script>
 <style>
 .index {
