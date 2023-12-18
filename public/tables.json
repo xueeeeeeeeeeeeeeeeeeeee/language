@@ -1,0 +1,165 @@
+{
+    "Question": [{
+        "title": "题目ID",
+        "dataIndex": "QuestionID"
+    }, {
+        "title": "题型",
+        "dataIndex": "QuestionType"
+    }, {
+        "title": "语种",
+        "dataIndex": "Language"
+    }, {
+        "title": "题目内容",
+        "dataIndex": "QuestionContent"
+    }, {
+        "title": "选项",
+        "dataIndex": "Options"
+    }, {
+        "title": "答案",
+        "dataIndex": "Answer"
+    }, {
+        "title": "所属学年",
+        "dataIndex": "AcademicYear"
+    }, {
+        "title": "难度",
+        "dataIndex": "Difficulty"
+    }, {
+        "title": "创建者",
+        "dataIndex": "CreatedBy"
+    }, {
+        "title": "备注",
+        "dataIndex": "Remarks"
+    }, {
+        "title": "标签",
+        "dataIndex": "tags"
+    }, {
+        "title": "操作",
+        "dataIndex": "operation",
+        "fixed": "right",
+        "width": 200,
+        "slots": {
+            "customRender": "operation"
+        }
+    }],
+    "Questioncreate": [{
+            "title": "上传学年",
+            "dataIndex": "AcademicYear"
+        }, {
+            "title": "题目ID",
+            "dataIndex": "QuestionID"
+        }, {
+            "title": "题型",
+            "dataIndex": "QuestionType"
+        }, {
+            "title": "语言",
+            "dataIndex": "Language"
+        }, {
+            "title": "题目类型",
+            "dataIndex": "QuestionContent"
+        }, {
+            "title": "选项",
+            "dataIndex": "Options"
+        }, {
+            "title": "答案",
+            "dataIndex": "Answer"
+        }, {
+            "title": "标签",
+            "dataIndex": "TagGroup"
+        }, {
+            "title": "难度",
+            "dataIndex": "Difficulty"
+        },
+        {
+            "title": "备注",
+            "dataIndex": "Remarks"
+        }
+    ],
+    "file": [{
+        "title": "应用",
+        "dataIndex": "import"
+    }, {
+        "title": "创建时间",
+        "dataIndex": "CreatedAt"
+    }, {
+        "title": "文件ID",
+        "dataIndex": "FileID"
+    }, {
+        "title": "上传者编号",
+        "dataIndex": "UploaderID"
+    }, {
+        "title": "文件路径",
+        "dataIndex": "FilePath"
+    }, {
+        "title": "文件名称",
+        "dataIndex": "FileName"
+    }, {
+        "title": "语言",
+        "dataIndex": "Language"
+    }, {
+        "title": "备注",
+        "dataIndex": "Remarks"
+    }, {
+        "title": "操作",
+        "dataIndex": "operation",
+        "fixed": "right",
+        "width": 200,
+        "slots": {
+            "customRender": "operation"
+        }
+    }],
+    "course": [{
+        "title": "课程名称",
+        "dataIndex": "CourseName"
+    }, {
+        "title": "教师ID",
+        "dataIndex": "TeacherID"
+    }, {
+        "title": "开课时间",
+        "dataIndex": "StartTime"
+    }, {
+        "title": "开课学院",
+        "dataIndex": "CollegeOfferingTheCourse"
+    }, {
+        "title": "课程ID",
+        "dataIndex": "CourseID"
+    }, {
+        "title": "标签",
+        "dataIndex": "tags"
+    }, {
+        "title": "操作",
+        "dataIndex": "operation",
+        "fixed": "right",
+        "width": 200,
+        "slots": {
+            "customRender": "operation"
+        }
+    }],
+    "user": [{
+        "title": "辨识ID",
+        "dataIndex": "IDcode"
+    }, {
+        "title": "Class",
+        "dataIndex": "班级"
+    }],
+    "exams": [{
+        "title": "测试号",
+        "dataIndex": "UnitID"
+    },{
+        "title": "考试时间",
+        "dataIndex": "ValidityPeriod"
+    },{
+        "title": "测试名称",
+        "dataIndex": "TestNaming"
+    },{
+        "title": "测试年份",
+        "dataIndex": "AcademicYear"
+    }, {
+        "title": "操作",
+        "dataIndex": "operation",
+        "fixed": "right",
+        "width": 200,
+        "slots": {
+            "customRender": "operation"
+        }
+    }]
+}

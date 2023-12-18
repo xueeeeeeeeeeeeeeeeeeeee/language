@@ -7,32 +7,59 @@
         <div class="loginbody-logintip">输入你的账号和密码进行登陆</div>
       </div>
       <div class="formitem">
-            <input type="text" required v-model="name" /><span>用户名</span>
-          </div>
-          <div class="formitem">
-            <input type="password" required v-model="password" /><span
-              >密码</span
-            >
-          </div>
-      <a-button type="primary" class="loginbody-button" @click="login">登陆</a-button>
+        <input type="text" required v-model="name" /><span>用户名</span>
+      </div>
+      <div class="formitem">
+        <input type="password" required v-model="password" /><span>密码</span>
+      </div>
+      <a-button type="primary" class="loginbody-button" @click="login"
+        >登陆</a-button
+      >
       <view class="reginster">没有账号？<a href="">即刻注册</a></view>
     </div>
   </div>
 </template>
 
 <script>
-
+import axios from "axios";
+import { message } from "ant-design-vue";
+import { useRouter  } from "vue-router";
 // const serveitems =;
 export default {
   data() {
     return {
+      name: "",
+      password: "",
     };
   },
 
   methods: {
-    login(){
-        console.log(1);
-    }
+    login() {
+      if (this.name == "" || this.password == "") {
+        message.info("账号或密码不能为空");
+      } else {
+        let formData = new FormData();
+        formData.append("IDcode", this.name);
+        formData.append("PasswordHash", this.password);
+        axios({
+          method: "post",
+          url: "/account/login",
+          data: formData,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }).then(function (response) {
+          console.log(response);
+          if(response.data.message=="登录成功"){
+            localStorage.setItem('token', response.data.token);
+            window.location.href = '/';
+          }else{
+            message.info(response.data.message);
+          }
+
+        });
+      }
+    },
   },
 };
 </script>
@@ -102,19 +129,19 @@ export default {
   font-size: 30px;
   font-weight: 700;
 }
-.loginbody-button{
-    width: 100%;
-    height: 3em;
+.loginbody-button {
+  width: 100%;
+  height: 3em;
 }
-.loginbody-logintip{
-    color: #a0a1a0;
+.loginbody-logintip {
+  color: #a0a1a0;
 }
-.reginster{
-color:  #8c8c9b;
+.reginster {
+  color: #8c8c9b;
 }
-.reginster a{
-    text-decoration: dashed;
-    color: #000;
-    font-weight: 900;
+.reginster a {
+  text-decoration: dashed;
+  color: #000;
+  font-weight: 900;
 }
 </style>

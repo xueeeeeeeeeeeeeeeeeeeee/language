@@ -1,11 +1,13 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+import {
+  createRouter,
+  createWebHashHistory
+} from 'vue-router'
 import login from '../views/login.vue'
-import index from'../views/index.vue'
-import hand from'../views/hand.vue'
-const routes = [
-  {
-    path: '/index',
-    name: 'home',
+import index from '../views/index.vue'
+import hand from '../views/hand.vue'
+const routes = [{
+    path: '/login',
+    name: 'login',
     component: login
   },
   {
