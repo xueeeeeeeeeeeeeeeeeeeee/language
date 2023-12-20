@@ -29,17 +29,67 @@ async function select(e) {
             response.data = res;
 
         })
+    } else if (e.key == 3) {
+        await getuser(e.courseID).then(res => {
+            response.data = res;
+
+        })
+    } else if (e.key == 6) {
+        await getcourseunit(e.courseID).then(res => {
+            response.data = res;
+
+        })
     }
 
     await axios.get('http://localhost:8080/tables.json').then(res => {
         if (e.key == 1) {
-            response.col = res.data.Question;
+            if (e.statechange == 0) {
+                response.col = res.data.Questioncreate
+
+            } else if(e.statechange==3){
+                response.col = res.data.Questionselect;
+            }else {
+                response.col = res.data.Question;
+            }
+
         } else if (e.key == 5) {
             response.col = res.data.file;
         } else if (e.key == 4) {
-            response.col = res.data.course;
-        }else if (e.key == 2) {
-            response.col = res.data.exams;
+            if (e.statechange == 0) {
+                response.col = res.data.coursecreate
+
+            } else if(e.statechange==3){
+                response.col = res.data.courseselect;
+            }else {
+                response.col = res.data.course;
+            }
+        } else if (e.key == 3) {
+            if (e.statechange == 0) {
+                response.col = res.data.usercreate
+
+            } else {
+                response.col = res.data.user;
+            }
+        } else if (e.key == 2) {
+            if (e.statechange == 0) {
+                response.col = res.data.examscreate
+
+            } else if(e.statechange==3){
+                response.col = res.data.examsselect;
+            }else {
+                response.col = res.data.exams;
+            }
+        } else if (e.key == 6) {
+            response.col = res.data.courseunit;
+        }else if (e.key == 41) {
+            if (e.statechange == 0) {
+                response.col = res.data.coursesectionscreate
+
+            } else if(e.statechange==3){
+                response.col = res.data.coursesectionsselect;
+            }else {
+                response.col = res.data.coursesections;
+            }
         }
     })
     return response;
@@ -125,9 +175,9 @@ const getfilelist = async () => {
             res = response.data.filelist;
             for (var i = 0; i < response.data.filelist.length; i++) {
                 if (response.data.filelist[i].FileType == ".png" || response.data.filelist[i].FileType == ".jpg") {
-                    res[i].import = "<image src='" + response.data.filelist[i].FilePath + "'>";
+                    res[i].import = "<img style='height:100%;width:100%' src='http://file.windbless.top/static/" + response.data.filelist[i].FileName + "'/>";
                 } else if (response.data.filelist[i].FileType == ".wav" || response.data.filelist[i].FileType == ".mp4") {
-                    res[i].import = "<video src='" + response.data.filelist[i].FilePath + "'>";
+                    res[i].import = "<video autoplay='play' style='height:100%;width:100%' src='http://file.windbless.top/static/" + response.data.filelist[i].FileName + "'/>";
                 }
             }
 
@@ -205,7 +255,7 @@ const getcourseinfo = async (CourseID) => {
     });
     return bigres;
 }
-const getexam=async()=>{
+const getexam = async () => {
     let bigres = Array();
     let formData = new FormData();
     formData.append("token", localStorage.getItem('token'));
@@ -221,7 +271,81 @@ const getexam=async()=>{
         if (response.data.code != 200) {
             bigres = "logout";
         } else {
-bigres=response.data.exams;
+            bigres = response.data.exams;
+        }
+    });
+
+    return bigres;
+}
+const getcourseunit = async (x) => {
+    let bigres = Array();
+    let formData = new FormData();
+    formData.append("token", localStorage.getItem('token'));
+    formData.append("CourseID", x);
+    // formData.append("CheckType", "all");
+    await axios({
+        method: "post",
+        url: "/courseunit/getxiaojieByCourse",
+        data: formData,
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    }).then(async function (response) {
+        console.log(response.data.data.sections);
+        if (response.data.code != 200) {
+            res = "logout";
+        } else if (response.data.data.sections != null) {
+            for (var i = 0; i < response.data.data.sections.length; i++) {
+                await getcourseunitinfo(response.data.data.sections[i]).then(
+                    res => {
+                        bigres.push(res);
+                    }
+                );
+            }
+        }
+    });
+    return bigres;
+}
+const getcourseunitinfo = async (CourseID) => {
+    let bigres;
+    let formData = new FormData();
+    formData.append("token", localStorage.getItem('token'));
+    formData.append("SectionID", CourseID);
+    // formData.append("CheckType", "all");
+    await axios({
+        method: "post",
+        url: "/course/getcoursebyparameters",
+        data: formData,
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    }).then(async function (response) {
+        if (response.data.code != 200) {
+            bigres = "logout";
+        } else {
+            bigres = response.data.data[0];
+        }
+    });
+    return bigres;
+}
+const getuser = async () => {
+    let bigres = Array();
+    let formData = new FormData();
+    formData.append("token", localStorage.getItem('token'));
+    formData.append("UnitID", "%");
+    await axios({
+        method: "post",
+        url: "/account/GetALLuserinfo",
+        data: formData,
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    }).then(async function (response) { // 声明为async函数
+        console.log(response);
+        if (response.data.code != 200) {
+            bigres = "logout";
+        } else {
+            bigres = response.data.data;
         }
     });
 

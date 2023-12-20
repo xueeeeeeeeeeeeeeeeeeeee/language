@@ -1,8 +1,16 @@
 <template>
-  <a-form :model="formState" v-if="statechange == '1'">
+  <a-drawer
+    :placement="drawervalue"
+    :closable="false"
+    v-model:visible="visible"
+    class="draweredit"
+    :width="720"
+    ><lookexamdetail :UnitID="formState.UnitID"> </lookexamdetail
+  ></a-drawer>
+  <a-form :model="formState" v-if="statechange == 1">
     <a-form-item
       :label="item.title"
-      v-for="(item, index) in columns.slice(0, 10)"
+      v-for="(item, index) in columns.slice(0, 4)"
       :key="item"
     >
       <a-textarea
@@ -13,12 +21,11 @@
       />
       <a-upload
         class="fileinput"
+        v-if="item.dataIndex == 'QuestionContent'"
         name="file"
         :multiple="false"
         @change="handleChange"
-        beforeUpload="false"
         accept=".jpg,.png,.mp4,.wav"
-        v-if="item.dataIndex == 'QuestionContent'"
       >
         <a-button>
           <upload-outlined></upload-outlined>
@@ -33,11 +40,9 @@
       ></a-select>
       <a-input v-model:value="formState[item.dataIndex]" v-else />
     </a-form-item>
-    <a-form-item>
-      <label for="tag">标签绑定</label>
-      <tag @handleInputConfirm="gettags" :data="tags"
-    /></a-form-item>
+
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+      <a-button type="primary" @click="lookTi">查看题库</a-button>
       <a-button type="primary" @click="onSubmit">确认</a-button>
       <a-button style="margin-left: 10px">取消</a-button>
     </a-form-item>
@@ -45,44 +50,37 @@
   <a-form :model="formState" v-else>
     <a-form-item
       :label="item.title"
-      v-for="(item, index) in columns"
+      v-for="(item, index) in columns.slice(0, 10)"
       :key="item"
     >
       <a-input v-model:value="formState[item.dataIndex]" />
     </a-form-item>
-    <a-form-item>
-      <label for="tag">标签绑定</label>
-      <tag @handleInputConfirm="gettags" :data="tags"
-    /></a-form-item>
     <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
       <a-button type="primary" @click="oncreate">新建</a-button>
       <a-button style="margin-left: 10px">取消</a-button>
     </a-form-item>
   </a-form>
 </template>
-  <script setup>
-import tag from "./tag.vue";
+    <script setup>
+import lookexamdetail from "./lookexamdetail.vue";
 import { message } from "ant-design-vue";
 import axios from "axios";
 import { ref, onMounted, onUpdated, toRefs, watch } from "vue";
 import { select } from "../js/axiosselect.js";
 import { useRouter } from "vue-router";
+const visible = ref(false);
+const drawervalue = ref("right");
 const router = useRouter();
 const props = defineProps({
-  statechange: String,
   data: Array(),
-});
+  statechange: Number,
+});let { statechange } = toRefs(props);
 let { data } = toRefs(props);
-let { statechange } = toRefs(props);
-watch([statechange, data], (val) => {
-  init();
-});
-const init = () => {
-  statechange.value = data._object.statechange;
+watch([data,statechange], (val) => {
   if (!localStorage.getItem("token")) {
     router.push("/login");
   }
-  var x = { key: 1, statechange: data._object.statechange };
+  var x = { key: 2, statechange: data._object.statechange };
   select(x).then((res) => {
     columns.value = res.col;
   });
@@ -96,23 +94,8 @@ const init = () => {
       formState.value[Object.entries(data._object.data)[i][0]] = "";
     }
   }
-
-  tags.value = formState.value.tags;
-  console.log(tags.value);
-};
-var formState = ref({
-  QuestionID: "",
-  QuestionType: "",
-  Language: "",
-  QuestionContent: "",
-  Options: "",
-  Answer: "",
-  AcademicYear: "",
-  Difficulty: "",
-  CreatedBy: "",
-  Remarks: "",
 });
-const tags = ref([]);
+var formState = ref({});
 const options = ref([
   {
     value: "多选题",
@@ -138,13 +121,11 @@ const options = ref([
 const fileId = ref("");
 const columns = ref([]);
 const filetype = ref("");
-
 onMounted(() => {
-  statechange.value = data._object.statechange;
   if (!localStorage.getItem("token")) {
     router.push("/login");
   }
-  var x = { key: 1, statechange: data._object.statechange };
+  var x = { key: 2, statechange: data._object.statechange };
   select(x).then((res) => {
     columns.value = res.col;
   });
@@ -158,12 +139,8 @@ onMounted(() => {
       formState.value[Object.entries(data._object.data)[i][0]] = "";
     }
   }
-
-  tags.value = formState.value.tags;
-  console.log(tags.value);
 });
 const handleChange = (e) => {
-  console.log(e.file);
   filetype.value = e.file.type;
 
   let formData = new FormData();
@@ -171,7 +148,6 @@ const handleChange = (e) => {
   formData.append("file", e.file);
   formData.append("Language", "汉语");
   formData.append("FileName", e.file.name);
-  console.log(formData);
   axios({
     method: "post",
     url: "/file/upload",
@@ -180,7 +156,7 @@ const handleChange = (e) => {
       "Content-Type": "multipart/form-data",
     },
   }).then(function (response) {
-    console.log(response);
+    console.log(response.data.message);
     if (response.data.message == "文件已经存在") {
       message.info("文件已经存在");
     } else {
@@ -191,10 +167,6 @@ const handleChange = (e) => {
     // notice.value = response.data.data;
     // console.log(notice.value);
   });
-};
-const gettags = (e) => {
-  tags.value = e.slice(1);
-  console.log(tags.value);
 };
 const getfile = () => {
   let formData = new FormData();
@@ -214,13 +186,13 @@ const getfile = () => {
           formState.value.QuestionContent +
           "<image src='" +
           response.data.url +
-          "'/>";
+          "'>";
       } else {
         formState.value.QuestionContent =
           formState.value.QuestionContent +
           "<video src='" +
           response.data.url +
-          "'/>";
+          "'>";
       }
       console.log(response.data.url);
     } else {
@@ -232,87 +204,59 @@ const getfile = () => {
 };
 const onSubmit = () => {
   let formData = new FormData();
- 
   formData.append("token", localStorage.getItem("token"));
+  formData.append("UnitID", formState.value.UnitID);
+  formData.append("ValidityPeriod", formState.value.ValidityPeriod);
+  formData.append("TestNaming", formState.value.TestNaming);
+  formData.append("QuestionBankSelection", "xuyao");
   formData.append("AcademicYear", formState.value.AcademicYear);
-  formData.append("QuestionID", formState.value.QuestionID);
-  formData.append("QuestionType", formState.value.QuestionType);
-  formData.append("Language", formState.value.Language);
-  formData.append("QuestionContent", formState.value.QuestionContent);
-  formData.append("Options", formState.value.Options);
-  formData.append("Answer", formState.value.Answer);
-  formData.append("Difficulty", formState.value.Difficulty);
-  formData.append("Remarks", formState.value.Remarks);
-  formData.append("AnswerType", formState.value.AnswerType);
+
   axios({
     method: "post",
-    url: "/tiku/EditQuestionInformation",
+    url: "/exam/EditExamUnit",
     data: formData,
     headers: {
       "Content-Type": "multipart/form-data",
     },
   }).then(function (response) {
     console.log(response);
-    if (response.data.message == "无权限编辑该题目") {
-      message.info("无权限编辑该题目");
-    } else if (response.data.message == "编辑题目信息成功") {
-      message.info("编辑题目信息成功");
-    } else {
-      message.info(response.data.message);
-    }
+    if(response.data.code==200){
+      message.info("修改成功");
+    }else{
+
+       message.info("修改失败");}
   });
-  for (var i = 0; i < tags.value.length; i++) {
-    let formData2 = new FormData();
-    console.log(tags.value[i]);
-    formData2.append("token", localStorage.getItem("token"));
-    formData2.append("QuestionID", formState.value.QuestionID);
-    formData2.append("TagID", tags.value[i]);
-    axios({
-      method: "post",
-      url: "/tiku/BindTiToTag",
-      data: formData2,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }).then(function (response) {
-      console.log(response);
-    });
-  }
 };
 const oncreate = () => {
   let formData = new FormData();
   formData.append("token", localStorage.getItem("token"));
+  formData.append("ValidityPeriod", formState.value.ValidityPeriod);
+  formData.append("TestNaming", formState.value.TestNaming);
+  formData.append("QuestionBankSelection", "xuyao");
   formData.append("AcademicYear", formState.value.AcademicYear);
-  formData.append("QuestionType", formState.value.QuestionType);
-  formData.append("Language", formState.value.Language);
-  formData.append("QuestionContent", formState.value.QuestionContent);
-  formData.append("Options", formState.value.Options);
-  formData.append("Answer", formState.value.Answer);
-  formData.append("Difficulty", formState.value.Difficulty);
-  formData.append("Remarks", formState.value.Remarks);
-  formData.append("AnswerType", formState.value.AnswerType);
+
   axios({
     method: "post",
-    url: "/tiku/AddQuestionInformation",
+    url: "/exam/AddExamUnit",
     data: formData,
     headers: {
       "Content-Type": "multipart/form-data",
     },
   }).then(function (response) {
     console.log(response);
-    if (response.data.message == "无权限编辑该题目") {
-      message.info("无权限编辑该题目");
-    } else if (response.data.message == "增加题目信息成功") {
-      message.info("增加题目信息成功");
-    } else {
-      message.info(response.data.message);
-    }
+    if(response.data.code==200){
+      message.info("添加考试单元成功");
+    }else{
+
+       message.info("添加考试单元失败");}
   });
   console.log(formState.value);
-  console.log(tags.value);
+};
+const lookTi = () => {
+  visible.value = true;
 };
 </script>
-<style scoped>
+  <style scoped>
 ::v-deep .fileinput .css-dev-only-do-not-override-eq3tly {
   margin-top: 30px;
 }

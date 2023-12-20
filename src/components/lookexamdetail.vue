@@ -6,7 +6,7 @@
     class="draweredit"
     :width="720"
   >
-    <addexamTI></addexamTI>
+    <addexamTI :UnitID="nowUnitID"></addexamTI>
   </a-drawer>
   <div class="index">
     <div class="rightbody">
@@ -68,7 +68,7 @@ import {
 const props = defineProps({
   UnitID: String,
 });
-
+const nowUnitID=ref("");
 const indata = ref("");
 const openKeys = ref(["sub1"]);
 const visible = ref(false);
@@ -76,7 +76,7 @@ const editcol = ref([]);
 const editableData = reactive({});
 let { UnitID } = toRefs(props);
 watch(UnitID, (val) => {
-  data.value.length = 0;
+    nowUnitID.value=UnitID._object.UnitID;
   if (!localStorage.getItem("token")) {
     router.push("/login");
   }
@@ -100,24 +100,8 @@ const selectedRowKeys = ref([]);
 const onSelectChange = (changableRowKeys) => {
   selectedRowKeys.value = changableRowKeys;
 };
-// onUpdated(()=>{
-//     data.value.length=0;
-//   if (!localStorage.getItem("token")) {
-//     router.push("/login");
-//   }
-//   var x = { key: 1 };
-//   select(x).then(async (res) => {
-//     if (res.data == "logout") {
-//     } else {
-//       columns.value = res.col;
-//       await findTi();
-//       for (var i = 0; i < data.value.length; i++) {
-//         data.value[i].key = i;
-//       }
-//     }
-//   });
-// })
 onMounted(() => {
+    nowUnitID.value=UnitID._object.UnitID;
   if (!localStorage.getItem("token")) {
     router.push("/login");
   }
@@ -132,13 +116,13 @@ onMounted(() => {
       }
     }
   });
-  console.log(UnitID);
+  console.log(UnitID._object.UnitID);
 });
 const findTi = async () => {
   let res = Array();
   let formData = new FormData();
   formData.append("token", localStorage.getItem("token"));
-  formData.append("UnitID", UnitID._object.UnitID);
+  formData.append("UnitID", nowUnitID.value);
   await axios({
     method: "post",
     url: "/tiku/CheckBindTiWithExam",

@@ -6,12 +6,12 @@
     class="draweredit"
     :width="720"
   >
-    <addexamTI></addexamTI>
+    <addcourseexam :course="nowcourseID"></addcourseexam>
   </a-drawer>
   <div class="index">
     <div class="rightbody">
       <div class="index-mainbody">
-        <a-button @click="imprtdata">导入题库</a-button>
+        <a-button @click="imprtdata">导入考试</a-button>
         <a-button @click="exportdata">导出数据</a-button>
         <a-table
           id="tabledata"
@@ -29,7 +29,7 @@
               </span>
             </template>
           </template>
-          <template #operation="{ column, record }">
+          <template #operation="{  record }">
             <div class="editable-rowtemplate-operations">
               <span>
                 <a @click="edit(record)">删除</a>
@@ -41,7 +41,8 @@
     </div>
   </div>
 </template>
-  <script setup>
+    <script setup>
+import addcourseexam from "@/components/addcourseexam";
 import addexamTI from "@/components/addexamTI";
 import { cloneDeep } from "lodash-es";
 import * as XLSX from "xlsx";
@@ -65,22 +66,25 @@ import {
   onUpdated,
   toRefs,
 } from "vue";
+import addcourseexamVue from "./addcourseexam.vue";
 const props = defineProps({
-  UnitID: String,
+  courseID: String,
 });
-
+const nowcourseID=ref("");
 const indata = ref("");
 const openKeys = ref(["sub1"]);
 const visible = ref(false);
 const editcol = ref([]);
 const editableData = reactive({});
-let { UnitID } = toRefs(props);
-watch(UnitID, (val) => {
+let { courseID } = toRefs(props);
+watch(courseID, (val) => {
+    nowcourseID.value=courseID._object.courseID;
+  console.log(courseID._object.courseID);
   data.value.length = 0;
   if (!localStorage.getItem("token")) {
     router.push("/login");
   }
-  var x = { key: 1 };
+  var x = { key: 2 };
   select(x).then(async (res) => {
     if (res.data == "logout") {
     } else {
@@ -91,67 +95,28 @@ watch(UnitID, (val) => {
       }
     }
   });
-  console.log(UnitID._object.UnitID);
-});
-const columns = ref([]);
-const data = ref([]);
-const token = ref("");
-const selectedRowKeys = ref([]);
-const onSelectChange = (changableRowKeys) => {
-  selectedRowKeys.value = changableRowKeys;
-};
-// onUpdated(()=>{
-//     data.value.length=0;
-//   if (!localStorage.getItem("token")) {
-//     router.push("/login");
-//   }
-//   var x = { key: 1 };
-//   select(x).then(async (res) => {
-//     if (res.data == "logout") {
-//     } else {
-//       columns.value = res.col;
-//       await findTi();
-//       for (var i = 0; i < data.value.length; i++) {
-//         data.value[i].key = i;
-//       }
-//     }
-//   });
-// })
-onMounted(() => {
-  if (!localStorage.getItem("token")) {
-    router.push("/login");
-  }
-  var x = { key: 1 };
-  select(x).then(async (res) => {
-    if (res.data == "logout") {
-    } else {
-      columns.value = res.col;
-      await findTi();
-      for (var i = 0; i < data.value.length; i++) {
-        data.value[i].key = i;
-      }
-    }
-  });
-  console.log(UnitID);
 });
 const findTi = async () => {
   let res = Array();
   let formData = new FormData();
   formData.append("token", localStorage.getItem("token"));
-  formData.append("UnitID", UnitID._object.UnitID);
+  formData.append("CourseID", courseID._object.courseID);
   await axios({
     method: "post",
-    url: "/tiku/CheckBindTiWithExam",
+    url: "/exam/QueryExamsByCourseId",
     data: formData,
     headers: {
       "Content-Type": "multipart/form-data",
     },
   }).then(async function (response) {
-    res = response.data.data.matched_idas;
-    for (var i = 0; i < res.length; i++) {
-      await selectTi(res[i]).then((reee) => {
-        data.value.push(reee);
-      });
+    console.log(response);
+    res = response.data.data.exam_units;
+    if (res != null) {
+      for (var i = 0; i < res.length; i++) {
+        await selectTi(res[i]).then((reee) => {
+          data.value.push(reee);
+        });
+      }
     }
   });
 
@@ -161,21 +126,47 @@ const selectTi = async (x) => {
   let res = Array();
   let formData = new FormData();
   formData.append("token", localStorage.getItem("token"));
-  formData.append("QuestionID", x);
-  formData.append("CheckType", "fuzzy");
+  formData.append("UnitID", x);
   await axios({
     method: "post",
-    url: "/tiku/GetQuestionsByParameters",
+    url: "/exam/GetExamByParameters",
     data: formData,
     headers: {
       "Content-Type": "multipart/form-data",
     },
   }).then(function (response) {
-    res = response.data.questions[0];
+    res = response.data.exams[0];
   });
 
   return res;
 };
+const columns = ref([]);
+const data = ref([]);
+const token = ref("");
+const selectedRowKeys = ref([]);
+const onSelectChange = (changableRowKeys) => {
+  selectedRowKeys.value = changableRowKeys;
+};
+onMounted(() => {
+    nowcourseID.value=courseID._object.courseID;
+  console.log(courseID._object.courseID);
+  if (!localStorage.getItem("token")) {
+    router.push("/login");
+  }
+  var x = { key: 2 };
+  select(x).then(async (res) => {
+    if (res.data == "logout") {
+    } else {
+      columns.value = res.col;
+      await findTi();
+      for (var i = 0; i < data.value.length; i++) {
+        data.value[i].key = i;
+      }
+    }
+  });
+  console.log(courseID);
+});
+
 const edit = (key) => {};
 const rowSelection = computed(() => {
   return {
@@ -288,7 +279,7 @@ const adddata = () => {
   statechange.value = 0;
 };
 </script>
-  <style>
+    <style>
 .index {
   width: 100%;
   height: 100%;

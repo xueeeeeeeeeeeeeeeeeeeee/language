@@ -33,9 +33,11 @@ import {
   defineEmits,
   nextTick,
   onMounted,
-  onUpdated
+  onUpdated,
+  watch,
+  toRefs,
 } from "vue";
-const emits = defineEmits();
+const emits = defineEmits(["handleInputConfirm"]);
 const options = reactive([
   {
     value: "多选题",
@@ -68,21 +70,18 @@ const state = reactive({
 const props = defineProps({
   data: Array(),
 });
-onUpdated(()=>{
-  state.tags=["标签选择"];
-  if (props.data!=null) {
-    state.tags = state.tags.concat(props.data);
+let { data } = toRefs(props);
+watch(data, (val) => {
+  state.tags = ["标签选择"];
+  if (data._object.data != null) {
+    state.tags = state.tags.concat(data._object.data);
   }
-
-  console.log(props.data);
-})
+});
 onMounted(() => {
-  state.tags=["标签选择"];
-  if (props.data!=null) {
-    state.tags = state.tags.concat(props.data);
+  state.tags = ["标签选择"];
+  if (data._object.data != null) {
+    state.tags = state.tags.concat(data._object.data);
   }
-
-  console.log(props.data);
 });
 const handleClose = (removedTag) => {
   const tags = state.tags.filter((tag) => tag !== removedTag);

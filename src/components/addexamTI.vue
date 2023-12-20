@@ -1,18 +1,8 @@
 <template>
-  <a-drawer
-    :placement="drawervalue"
-    :closable="false"
-    v-model:visible="visible"
-    class="draweredit"
-    :width="720"
-  >
-    <addexamTI></addexamTI>
-  </a-drawer>
   <div class="index">
     <div class="rightbody">
       <div class="index-mainbody">
-        <a-button @click="imprtdata">导入题库</a-button>
-        <a-button @click="exportdata">导出数据</a-button>
+        <a-button @click="adddata">导入</a-button>
         <a-table
           id="tabledata"
           :row-selection="rowSelection"
@@ -32,7 +22,7 @@
           <template #operation="{ column, record }">
             <div class="editable-rowtemplate-operations">
               <span>
-                <a @click="edit(record)">删除</a>
+                <a @click="edit(record)">编辑</a>
               </span>
             </div>
           </template>
@@ -42,140 +32,107 @@
   </div>
 </template>
   <script setup>
-import addexamTI from "@/components/addexamTI";
-import { cloneDeep } from "lodash-es";
-import * as XLSX from "xlsx";
+  import axios from 'axios';
+  import { message } from "ant-design-vue";
 import { select } from "../js/axiosselect.js";
-import axios from "axios";
-import FileSaver from "file-saver";
 import { useRouter } from "vue-router";
-const drawervalue = ref("right");
 const router = useRouter();
-const state = ref("1");
-const nowkey = ref("1");
-const statechange = ref("0");
-const selectcourseID = ref("");
 import {
   reactive,
   ref,
   watch,
+  toRefs,
   computed,
   unref,
   onMounted,
   onUpdated,
-  toRefs,
+  defineComponent,
 } from "vue";
+const indata = ref("");
+import { Table } from "ant-design-vue";
+import addquestionVue from "@/components/addquestion.vue";
+const selectedKeys = ref(["1"]);
+const openKeys = ref(["sub1"]);
+const visible = ref(false);
+function getItem(label, key, icon, children, type) {
+  return {
+    key,
+    icon,
+    children,
+    label,
+    type,
+  };
+}
+const editcol = ref([]);
 const props = defineProps({
   UnitID: String,
 });
 
-const indata = ref("");
-const openKeys = ref(["sub1"]);
-const visible = ref(false);
-const editcol = ref([]);
-const editableData = reactive({});
 let { UnitID } = toRefs(props);
-watch(UnitID, (val) => {
-  data.value.length = 0;
+watch(UnitID, async (val) => {
+    console.log(UnitID._object.UnitID);
   if (!localStorage.getItem("token")) {
-    router.push("/login");
   }
   var x = { key: 1 };
-  select(x).then(async (res) => {
+  select(x).then((res) => {
     if (res.data == "logout") {
+      router.push("/login");
     } else {
       columns.value = res.col;
-      await findTi();
+      data.value = res.data;
       for (var i = 0; i < data.value.length; i++) {
         data.value[i].key = i;
       }
+      for (var i = 0; i < res.col.length - 1; i++) {
+        editcol.value.push(res.col[i].dataIndex);
+      }
     }
+
+    console.log(res);
   });
-  console.log(UnitID._object.UnitID);
 });
-const columns = ref([]);
+const columns = ref([
+  {
+    title: "Name",
+    dataIndex: "name",
+  },
+  {
+    title: "Age",
+    dataIndex: "age",
+  },
+  {
+    title: "Address",
+    dataIndex: "address",
+  },
+]);
 const data = ref([]);
 const token = ref("");
 const selectedRowKeys = ref([]);
 const onSelectChange = (changableRowKeys) => {
   selectedRowKeys.value = changableRowKeys;
 };
-// onUpdated(()=>{
-//     data.value.length=0;
-//   if (!localStorage.getItem("token")) {
-//     router.push("/login");
-//   }
-//   var x = { key: 1 };
-//   select(x).then(async (res) => {
-//     if (res.data == "logout") {
-//     } else {
-//       columns.value = res.col;
-//       await findTi();
-//       for (var i = 0; i < data.value.length; i++) {
-//         data.value[i].key = i;
-//       }
-//     }
-//   });
-// })
 onMounted(() => {
+    console.log(UnitID._object.UnitID);
   if (!localStorage.getItem("token")) {
-    router.push("/login");
   }
   var x = { key: 1 };
-  select(x).then(async (res) => {
+  select(x).then((res) => {
     if (res.data == "logout") {
+      router.push("/login");
     } else {
       columns.value = res.col;
-      await findTi();
+      data.value = res.data;
       for (var i = 0; i < data.value.length; i++) {
         data.value[i].key = i;
       }
+      for (var i = 0; i < res.col.length - 1; i++) {
+        editcol.value.push(res.col[i].dataIndex);
+      }
     }
+
+    console.log(res);
   });
-  console.log(UnitID);
 });
-const findTi = async () => {
-  let res = Array();
-  let formData = new FormData();
-  formData.append("token", localStorage.getItem("token"));
-  formData.append("UnitID", UnitID._object.UnitID);
-  await axios({
-    method: "post",
-    url: "/tiku/CheckBindTiWithExam",
-    data: formData,
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  }).then(async function (response) {
-    res = response.data.data.matched_idas;
-    for (var i = 0; i < res.length; i++) {
-      await selectTi(res[i]).then((reee) => {
-        data.value.push(reee);
-      });
-    }
-  });
-
-  return res;
-};
-const selectTi = async (x) => {
-  let res = Array();
-  let formData = new FormData();
-  formData.append("token", localStorage.getItem("token"));
-  formData.append("QuestionID", x);
-  formData.append("CheckType", "fuzzy");
-  await axios({
-    method: "post",
-    url: "/tiku/GetQuestionsByParameters",
-    data: formData,
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  }).then(function (response) {
-    res = response.data.questions[0];
-  });
-
-  return res;
-};
 const edit = (key) => {};
 const rowSelection = computed(() => {
   return {
@@ -255,38 +212,33 @@ const rowSelection = computed(() => {
     ],
   };
 });
-const exportdata = () => {
-  const exportArr = data.value;
-  const Header = [];
-  const head = [];
-  for (var i = 0; i < columns.value.length; i++) {
-    head.push(columns.value[i].title);
-  }
-  Header.push(head);
-  console.log(Header);
-  // 官方文档中的描述：converts an array of arrays of JS data to a worksheet.
-  const headerWs = XLSX.utils.aoa_to_sheet(Header);
-  const ws = XLSX.utils.sheet_add_json(headerWs, exportArr, {
-    skipHeader: true,
-    origin: "A2",
-  });
 
-  /* 新建空workbook，然后加入worksheet */
-  const wb = XLSX.utils.book_new();
-
-  // 可以自定义下载之后的sheetname
-  XLSX.utils.book_append_sheet(wb, ws, "sheetName");
-
-  /* 生成xlsx文件 */
-  XLSX.writeFile(wb, "下载.xlsx");
-};
-const imprtdata = () => {
-  visible.value = true;
-};
+const imprtdata = () => {};
 const adddata = () => {
-  visible.value = true;
-  statechange.value = 0;
+  console.log(rowSelection.value.selectedRowKeys);
+  for (var i = 0; i < rowSelection.value.selectedRowKeys.length; i++) {
+    console.log(data.value[rowSelection.value.selectedRowKeys[i]].QuestionID);
+    bindTi(data.value[rowSelection.value.selectedRowKeys[i]].QuestionID);
+  }
+  message.info("绑定成功");
 };
+const bindTi=async(x)=>{
+    let formData = new FormData();
+    formData.append("token", localStorage.getItem('token'));
+    formData.append("QuestionID", x);
+    formData.append("UnitID",UnitID._object.UnitID);
+    await axios({
+        method: "post",
+        url: "/tiku/BindTiWithExam",
+        data: formData,
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    }).then(async function (response) { // 声明为async函数
+        console.log(response);
+
+    });
+}
 </script>
   <style>
 .index {

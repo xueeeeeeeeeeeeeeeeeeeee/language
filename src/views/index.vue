@@ -5,20 +5,39 @@
     v-model:visible="visible"
     class="draweredit"
     :width="720"
-
   >
-    <addquestion :data="indata" v-if="state == '1'"></addquestion>
+  <onload v-if="state == '200'"  :data="nowkey"></onload>
+    <selectdata v-if="state == '100'" :data="nowkey" @selectdata="selectnowdata"></selectdata>
+    <addexam
+      :data="indata"
+      :statechange="statechange"
+      v-if="state == '2'"
+    ></addexam>
+    <adduser
+      :data="indata"
+      :statechange="statechange"
+      v-if="state == '3'"
+    ></adduser>
+    <addquestion
+      :data="indata"
+      :statechange="statechange"
+      v-if="state == '1'"
+    ></addquestion>
     <addfile
       v-if="state == '55'"
       :data="indata"
       :statechange="statechange"
     ></addfile>
+    <lookfile
+      v-if="state == '5'"
+      :data="indata"
+    ></lookfile>
     <addclass
       v-if="state == '44'"
       :data="indata"
       :statechange="statechange"
     ></addclass>
-    <lookcourse></lookcourse>
+    <lookcourse v-if="state == '4'" :courseID="selectcourseID"></lookcourse>
   </a-drawer>
   <div class="index">
     <div class="leftnav">
@@ -34,17 +53,21 @@
       ></a-menu>
     </div>
     <div class="rightbody">
-      <div class="nav"></div>
+      <div class="navbar">
+        <a class="logout" @click="logout">退出登录</a>
+      </div>
       <div class="index-mainbody">
         <a-button @click="adddata">新建</a-button>
         <a-button @click="imprtdata">导入数据</a-button>
         <a-button @click="exportdata">导出数据</a-button>
+        <a-button @click="finddata">查询数据</a-button>
         <a-table
           id="tabledata"
           :row-selection="rowSelection"
           :columns="columns"
           :data-source="data"
-          :pagination="{ pageSize: 7 }"
+          :pagination="{ pageSize: 4 }"
+          :scroll="{ x: 1500 }"
         >
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex === 'tags'">
@@ -68,6 +91,11 @@
   </div>
 </template>
 <script setup>
+import onload from "@/components/onload.vue";
+import lookfile from "@/components/lookfile.vue";
+import selectdata from "@/components/selectdata";
+import addexam from "@/components/addexam.vue";
+import adduser from "@/components/adduser.vue";
 import addclass from "../components/addclass.vue";
 import lookcourse from "@/components/lookcourse.vue";
 import addquestion from "../components/addquestion.vue";
@@ -78,11 +106,12 @@ import { select } from "../js/axiosselect.js";
 import axios from "axios";
 import FileSaver from "file-saver";
 import { useRouter } from "vue-router";
-const drawervalue=ref("right");
+const drawervalue = ref("right");
 const router = useRouter();
 const state = ref("1");
 const nowkey = ref("1");
 const statechange = ref("0");
+const selectcourseID = ref("");
 import {
   reactive,
   ref,
@@ -161,7 +190,9 @@ onMounted(() => {
     } else {
       columns.value = res.col;
       data.value = res.data;
-
+      for (var i = 0; i < data.value.length; i++) {
+        data.value[i].key = i;
+      }
       for (var i = 0; i < res.col.length - 1; i++) {
         editcol.value.push(res.col[i].dataIndex);
       }
@@ -171,11 +202,23 @@ onMounted(() => {
   });
 });
 const edit = (key) => {
+  statechange.value = "1";
+  drawervalue.value = "right";
   if (nowkey.value == 1) {
     state.value = "1";
-  }else if(nowkey.value==4){
-    drawervalue.value="bottom";
-    state.value = "4";
+  } else if (nowkey.value == 4) {
+    // drawervalue.value = "bottom";
+    state.value = "44";
+    selectcourseID.value = key.CourseID;
+  } else if (nowkey.value == 3) {
+    state.value = "3";
+    selectcourseID.value = key.CourseID;
+  } else if (nowkey.value == 2) {
+    state.value = "2";
+    selectcourseID.value = key.CourseID;
+  } else if (nowkey.value == 5) {
+    state.value = "5";
+    selectcourseID.value = key.CourseID;
   }
 
   console.log(key);
@@ -184,6 +227,7 @@ const edit = (key) => {
     data.value.filter((item) => key === item.key)[0]
   );
   console.log(data.value);
+
   visible.value = true;
 };
 const rowSelection = computed(() => {
@@ -200,6 +244,7 @@ const rowSelection = computed(() => {
           newSelectedRowKeys = changableRowKeys.filter((_key, index) => {
             return true;
           });
+          console.log(newSelectedRowKeys);
           selectedRowKeys.value = newSelectedRowKeys;
         },
       },
@@ -289,21 +334,42 @@ const exportdata = () => {
   /* 生成xlsx文件 */
   XLSX.writeFile(wb, "下载.xlsx");
 };
-const imprtdata = () => {};
-const adddata = () => {
-  if (nowkey.value == 5) {
-    console.log(nowkey.value);
-    state.value = "55";
-    console.log(state.value);
-    visible.value = true;
-  } else if (nowkey.value == 4) {
-    console.log(nowkey.value);
-    state.value = "44";
-    console.log(state.value);
-    visible.value = true;
-  }
-  statechange.value = 0;
+const imprtdata = () => {
+  state.value = "200";
+  
+  visible.value = true;
 };
+const adddata = () => {
+    statechange.value = "0";
+  drawervalue.value = "right";
+  if (nowkey.value == 5) {
+    state.value = "55";
+  } else if (nowkey.value == 4) {
+    state.value = "44";
+  } else if (nowkey.value == 3) {
+    state.value = "3";
+  } else if (nowkey.value == 1) {
+    state.value = "1";
+  } else if (nowkey.value == 2) {
+    state.value = "2";
+  }
+  visible.value = true;
+
+};
+const selectnowdata=(e)=>{
+  data.value=e;
+console.log(e);
+visible.value=false;
+}
+const finddata = () => {
+  drawervalue.value = "right";
+  state.value = "100";
+  visible.value = true;
+};
+const logout=()=>{
+  localStorage.removeItem('token');
+  router.push("/login");
+}
 </script>
 <style>
 .index {
@@ -333,6 +399,19 @@ const adddata = () => {
   width: 100%;
   height: 3em;
   background-color: aqua;
+}.navbar {
+  padding-right:1em ;
+  width: 100%;
+  height: 3em;
+  border-bottom: #000 solid 1px;
+  display: flex;
+  justify-content: end;
+  /* justify-content: center; */
+  align-items: center;
+}
+.logout {
+  cursor: pointer;
+  font-size: 10px;
 }
 .index-mainbody {
   width: 100%;

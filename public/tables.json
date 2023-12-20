@@ -30,12 +30,14 @@
         "title": "备注",
         "dataIndex": "Remarks"
     }, {
+        "title": "答案类型",
+        "dataIndex": "AnswerType"
+    }, {
         "title": "标签",
         "dataIndex": "tags"
     }, {
         "title": "操作",
         "dataIndex": "operation",
-        "fixed": "right",
         "width": 200,
         "slots": {
             "customRender": "operation"
@@ -44,9 +46,6 @@
     "Questioncreate": [{
             "title": "上传学年",
             "dataIndex": "AcademicYear"
-        }, {
-            "title": "题目ID",
-            "dataIndex": "QuestionID"
         }, {
             "title": "题型",
             "dataIndex": "QuestionType"
@@ -68,12 +67,40 @@
         }, {
             "title": "难度",
             "dataIndex": "Difficulty"
+        }, {
+            "title": "答案类型",
+            "dataIndex": "AnswerType"
         },
         {
             "title": "备注",
             "dataIndex": "Remarks"
         }
     ],
+    "Questionselect": [{
+        "title": "题目ID",
+        "dataIndex": "QuestionID"
+    }, {
+        "title": "题型",
+        "dataIndex": "QuestionType"
+    }, {
+        "title": "语种",
+        "dataIndex": "Language"
+    }, {
+        "title": "题目内容",
+        "dataIndex": "QuestionContent"
+    }, {
+        "title": "选项",
+        "dataIndex": "Options"
+    }, {
+        "title": "答案",
+        "dataIndex": "Answer"
+    }, {
+        "title": "所属学年",
+        "dataIndex": "AcademicYear"
+    }, {
+        "title": "难度",
+        "dataIndex": "Difficulty"
+    }],
     "file": [{
         "title": "应用",
         "dataIndex": "import"
@@ -99,10 +126,10 @@
         "title": "备注",
         "dataIndex": "Remarks"
     }, {
-        "title": "操作",
-        "dataIndex": "operation",
+        "title": "查看",
         "fixed": "right",
-        "width": 200,
+        "dataIndex": "operation",
+        "width": 50,
         "slots": {
             "customRender": "operation"
         }
@@ -123,6 +150,9 @@
         "title": "课程ID",
         "dataIndex": "CourseID"
     }, {
+        "title": "课程头像",
+        "dataIndex": "ImageUrl"
+    }, {
         "title": "标签",
         "dataIndex": "tags"
     }, {
@@ -134,23 +164,129 @@
             "customRender": "operation"
         }
     }],
+    "courseselect": [{
+        "title": "课程名称",
+        "dataIndex": "CourseName"
+    }, {
+        "title": "教师ID",
+        "dataIndex": "TeacherID"
+    }, {
+        "title": "开课时间",
+        "dataIndex": "StartTime"
+    }, {
+        "title": "开课学院",
+        "dataIndex": "CollegeOfferingTheCourse"
+    }, {
+        "title": "课程ID",
+        "dataIndex": "CourseID"
+    }],
+    "coursecreate": [{
+        "title": "课程名称",
+        "dataIndex": "CourseName"
+    }, {
+        "title": "开课时间",
+        "dataIndex": "StartTime"
+    }, {
+        "title": "开课学院",
+        "dataIndex": "CollegeOfferingTheCourse"
+    }, {
+        "title": "课程描述",
+        "dataIndex": "CourseIntroduction"
+    }, {
+        "title": "课程头像",
+        "dataIndex": "ImageUrl"
+    }],
     "user": [{
         "title": "辨识ID",
-        "dataIndex": "IDcode"
+        "dataIndex": "StudentID"
     }, {
-        "title": "Class",
-        "dataIndex": "班级"
+        "title": "班级",
+        "dataIndex": "AdministrativeClass"
+    }, {
+        "title": "名字",
+        "dataIndex": "Name"
+    }, {
+        "title": "国籍",
+        "dataIndex": "Nationality"
+    }, {
+        "title": "性别",
+        "dataIndex": "Gender"
+    }, {
+        "title": "年龄",
+        "dataIndex": "Age"
+    }, {
+        "title": "学制",
+        "dataIndex": "LearningDurationBeforeEnrollment"
+    }, {
+        "title": "毕业时间",
+        "dataIndex": "Grade"
+    }, {
+        "title": "学院",
+        "dataIndex": "College"
+    }, {
+        "title": "操作",
+        "dataIndex": "operation",
+        "fixed": "right",
+        "width": 200,
+        "slots": {
+            "customRender": "operation"
+        }
     }],
+    "usercreate": [{
+            "title": "学号",
+            "dataIndex": "IDcode"
+        },
+        {
+            "title": "身份",
+            "dataIndex": "Class"
+        },
+        {
+            "title": "姓名",
+            "dataIndex": "Name"
+        },
+        {
+            "title": "密码",
+            "dataIndex": "PasswordHash"
+        },
+        {
+            "title": "国籍",
+            "dataIndex": "Nationality"
+        },
+        {
+            "title": "年龄",
+            "dataIndex": "Age"
+        },
+        {
+            "title": "年制度",
+            "dataIndex": "LearningDurationBeforeEnrollment"
+        },
+        {
+            "title": "性别",
+            "dataIndex": "Gender"
+        },
+        {
+            "title": "年级",
+            "dataIndex": "Grade"
+        },
+        {
+            "title": "学院",
+            "dataIndex": "College"
+        },
+        {
+            "title": "班级",
+            "dataIndex": "AdministrativeClass"
+        }
+    ],
     "exams": [{
         "title": "测试号",
         "dataIndex": "UnitID"
-    },{
+    }, {
         "title": "考试时间",
         "dataIndex": "ValidityPeriod"
-    },{
+    }, {
         "title": "测试名称",
         "dataIndex": "TestNaming"
-    },{
+    }, {
         "title": "测试年份",
         "dataIndex": "AcademicYear"
     }, {
@@ -161,5 +297,88 @@
         "slots": {
             "customRender": "operation"
         }
-    }]
+    }],
+    "examscreate": [{
+        "title": "考试时间",
+        "dataIndex": "ValidityPeriod"
+    }, {
+        "title": "测试名称",
+        "dataIndex": "TestNaming"
+    }, {
+        "title": "测试年份",
+        "dataIndex": "AcademicYear"
+    }, {
+        "title": "备注",
+        "dataIndex": "QuestionBankSelection"
+    }],
+    "examsselect": [{
+        "title": "测试号",
+        "dataIndex": "UnitID"
+    }, {
+        "title": "考试时间",
+        "dataIndex": "ValidityPeriod"
+    }, {
+        "title": "测试名称",
+        "dataIndex": "TestNaming"
+    }, {
+        "title": "测试年份",
+        "dataIndex": "AcademicYear"
+    }],
+    "courseunit": [{
+        "title": "小节ID",
+        "dataIndex": "SectionID"
+    }, {
+        "title": "小节名字",
+        "dataIndex": "SectionName"
+    }, {
+        "title": "层级目录号",
+        "dataIndex": "HierarchyDirectoryNumber"
+    }, {
+        "title": "绑定题库",
+        "dataIndex": "QuestionBankSelection"
+    }, {
+        "title": "操作",
+        "dataIndex": "operation",
+        "fixed": "right",
+        "width": 200,
+        "slots": {
+            "customRender": "operation"
+        }
+    }],
+    "coursesections": [{
+            "title": "小节号",
+            "dataIndex": "SectionID"
+        },
+        {
+            "title": "层级目录号",
+            "dataIndex": "HierarchyDirectoryNumber"
+        },
+        {
+            "title": "题库选题",
+            "dataIndex": "QuestionBankSelection"
+        }, {
+            "title": "小节名字",
+            "dataIndex": "SectionName"
+        }, {
+            "title": "操作",
+            "dataIndex": "operation",
+            "fixed": "right",
+            "width": 200,
+            "slots": {
+                "customRender": "operation"
+            }
+        }
+    ],
+    "coursesectionscreate": [{
+            "title": "层级目录号",
+            "dataIndex": "HierarchyDirectoryNumber"
+        },
+        {
+            "title": "题库选题",
+            "dataIndex": "QuestionBankSelection"
+        }, {
+            "title": "小节名字",
+            "dataIndex": "SectionName"
+        }
+    ]
 }
